@@ -16,11 +16,11 @@
           "max_gap_seconds": "Maximum measurement interval"
         },
         "data_description": {
-          "consumption_sensor": "W or kW. Often called Consumption: sensor.izypower_cloud_<station>_consommation. Exclude battery charging.",
-          "grid_sensor": "Often Grid power: sensor.izypower_cloud_<station>_puissance_reseau. Positive = import, negative = export. With separate meters, select positive import here.",
-          "additional_consumption": "Leave empty if the main sensor already includes all loads. An EV charger is optional. Example: sensor.isypower_cloud_<station>_puissance_borne_de_recharge. Never add a load twice.",
+          "consumption_sensor": "W or kW. Often called Consumption: sensor.izypower_cloud_station_name_consommation. Exclude battery charging.",
+          "grid_sensor": "Often Grid power: sensor.izypower_cloud_station_name_puissance_reseau. Positive = import, negative = export. With separate meters, select positive import here.",
+          "additional_consumption": "Leave empty if the main sensor already includes all loads. An EV charger is optional. Example: sensor.isypower_cloud_station_name_puissance_borne_de_recharge. Never add a load twice.",
           "export_sensor": "Only for two distinct positive import/export sensors, e.g. sensor.grid_export_power. Leave empty for a signed grid sensor.",
-          "source_timestamp": "Example: sensor.izypower_cloud_<station>_derniere_mise_a_jour. Deduplicates cloud reports. Otherwise HA states are sampled.",
+          "source_timestamp": "Example: sensor.izypower_cloud_station_name_derniere_mise_a_jour. Deduplicates cloud reports. Otherwise HA states are sampled.",
           "currency": "Three-letter code such as EUR, CHF or CAD. It remains fixed for this history.",
           "invert_grid": "Enable only for a grid sensor that is negative on import and positive on export.",
           "max_age_seconds": "Seconds; 0 disables age checks for sources that only publish on value changes.",
@@ -87,11 +87,11 @@
           "max_gap_seconds": "Maximum measurement interval"
         },
         "data_description": {
-          "consumption_sensor": "W or kW. Often called Consumption: sensor.izypower_cloud_<station>_consommation. Exclude battery charging.",
-          "grid_sensor": "Often Grid power: sensor.izypower_cloud_<station>_puissance_reseau. Positive = import, negative = export. With separate meters, select positive import here.",
-          "additional_consumption": "Leave empty if the main sensor already includes all loads. An EV charger is optional. Example: sensor.isypower_cloud_<station>_puissance_borne_de_recharge. Never add a load twice.",
+          "consumption_sensor": "W or kW. Often called Consumption: sensor.izypower_cloud_station_name_consommation. Exclude battery charging.",
+          "grid_sensor": "Often Grid power: sensor.izypower_cloud_station_name_puissance_reseau. Positive = import, negative = export. With separate meters, select positive import here.",
+          "additional_consumption": "Leave empty if the main sensor already includes all loads. An EV charger is optional. Example: sensor.isypower_cloud_station_name_puissance_borne_de_recharge. Never add a load twice.",
           "export_sensor": "Only for two distinct positive import/export sensors, e.g. sensor.grid_export_power. Leave empty for a signed grid sensor.",
-          "source_timestamp": "Example: sensor.izypower_cloud_<station>_derniere_mise_a_jour. Deduplicates cloud reports. Otherwise HA states are sampled.",
+          "source_timestamp": "Example: sensor.izypower_cloud_station_name_derniere_mise_a_jour. Deduplicates cloud reports. Otherwise HA states are sampled.",
           "invert_grid": "Enable only for a grid sensor that is negative on import and positive on export.",
           "max_age_seconds": "Seconds; 0 disables age checks for sources that only publish on value changes.",
           "max_gap_seconds": "Seconds; longer gaps are skipped without discarding the rest of the day."

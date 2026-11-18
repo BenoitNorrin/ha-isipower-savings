@@ -18,7 +18,7 @@ def states(hass, when, home=1000, grid=400):
 
 
 async def test_partial_day_and_recorded_prices(hass):
-    now = datetime.now(timezone.utc)
+    now = datetime(2026, 1, 10, 12, tzinfo=timezone.utc)
     cfg = config()
     c = SavingsCoordinator(hass, cfg)
     c.now = lambda: now
@@ -44,7 +44,7 @@ async def test_partial_day_and_recorded_prices(hass):
 
 
 async def test_additional_load_is_optional_and_is_not_added_to_grid(hass):
-    now = datetime.now(timezone.utc)
+    now = datetime(2026, 1, 10, 12, tzinfo=timezone.utc)
     c = SavingsCoordinator(hass, config(additional_consumption=["sensor.workshop_power"]))
     states(hass, now, home=1000, grid=5000)
     hass.states.async_set("sensor.workshop_power", "4", {"unit_of_measurement": "kW"})
@@ -54,7 +54,7 @@ async def test_additional_load_is_optional_and_is_not_added_to_grid(hass):
 
 
 async def test_unavailable_additional_load_is_not_assumed_zero(hass):
-    now = datetime.now(timezone.utc)
+    now = datetime(2026, 1, 10, 12, tzinfo=timezone.utc)
     c = SavingsCoordinator(hass, config(additional_consumption=["sensor.workshop_power"]))
     states(hass, now)
     hass.states.async_set("sensor.workshop_power", "unavailable")
@@ -62,7 +62,7 @@ async def test_unavailable_additional_load_is_not_assumed_zero(hass):
 
 
 async def test_separate_export_and_opposite_grid_sign(hass):
-    now = datetime.now(timezone.utc)
+    now = datetime(2026, 1, 10, 12, tzinfo=timezone.utc)
     c = SavingsCoordinator(hass, config(invert_grid=True, export_sensor="sensor.export_power"))
     states(hass, now, grid=-400)
     hass.states.async_set("sensor.export_power", "200", {"unit_of_measurement": "W"})
@@ -72,7 +72,7 @@ async def test_separate_export_and_opposite_grid_sign(hass):
 
 
 async def test_stale_report_does_not_create_fake_ongoing_consumption(hass):
-    now = datetime.now(timezone.utc)
+    now = datetime(2026, 1, 10, 12, tzinfo=timezone.utc)
     c = SavingsCoordinator(hass, config())
     states(hass, now-timedelta(hours=1))
     assert c.reading(now)["error"] == "source_stale"
