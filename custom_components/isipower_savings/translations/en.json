@@ -25,7 +25,8 @@
           "invert_grid": "Enable only for a grid sensor that is negative on import and positive on export.",
           "max_age_seconds": "Seconds; 0 disables age checks for sources that only publish on value changes.",
           "max_gap_seconds": "Seconds; longer gaps are skipped without discarding the rest of the day."
-        }
+        },
+        "description": "Select consumption and grid power. All other measurements are optional; an EV charger is not required."
       },
       "tariffs": {
         "title": "Configure import tariffs",
@@ -46,7 +47,8 @@
           "super_off_peak_enabled": "Optional; takes precedence over overlapping off-peak windows.",
           "super_off_peak_rate": "Price per kWh, including zero.",
           "super_off_peak_windows": "For example 02:00-04:00. Separate multiple windows with commas."
-        }
+        },
+        "description": "Prices are per kWh. New prices and schedules are recorded and do not reprice past periods."
       },
       "export": {
         "title": "Configure export",
@@ -57,7 +59,8 @@
         "data_description": {
           "export_mode": "Unpaid export is distinct from selling. Export energy is always recorded; only remunerated export earns revenue. Does not control hardware.",
           "export_rate": "Price per exported kWh, independent of import. Ignored when export is not remunerated."
-        }
+        },
+        "description": "Unpaid export is separate from selling. These options do not control hardware."
       },
       "user": {
         "title": "Choose measurements",
@@ -82,7 +85,8 @@
           "invert_grid": "Enable only for a grid sensor that is negative on import and positive on export.",
           "max_age_seconds": "Seconds; 0 disables age checks for sources that only publish on value changes.",
           "max_gap_seconds": "Seconds; longer gaps are skipped without discarding the rest of the day."
-        }
+        },
+        "description": "Select consumption and grid power. All other measurements are optional; an EV charger is not required."
       }
     },
     "error": {
@@ -121,7 +125,8 @@
           "invert_grid": "Enable only for a grid sensor that is negative on import and positive on export.",
           "max_age_seconds": "Seconds; 0 disables age checks for sources that only publish on value changes.",
           "max_gap_seconds": "Seconds; longer gaps are skipped without discarding the rest of the day."
-        }
+        },
+        "description": "Select consumption and grid power. All other measurements are optional; an EV charger is not required."
       },
       "tariffs": {
         "title": "Configure import tariffs",
@@ -142,7 +147,8 @@
           "super_off_peak_enabled": "Optional; takes precedence over overlapping off-peak windows.",
           "super_off_peak_rate": "Price per kWh, including zero.",
           "super_off_peak_windows": "For example 02:00-04:00. Separate multiple windows with commas."
-        }
+        },
+        "description": "Prices are per kWh. New prices and schedules are recorded and do not reprice past periods."
       },
       "export": {
         "title": "Configure export",
@@ -153,7 +159,8 @@
         "data_description": {
           "export_mode": "Unpaid export is distinct from selling. Export energy is always recorded; only remunerated export earns revenue. Does not control hardware.",
           "export_rate": "Price per exported kWh, independent of import. Ignored when export is not remunerated."
-        }
+        },
+        "description": "Unpaid export is separate from selling. These options do not control hardware."
       },
       "init": {
         "title": "Choose measurements",
@@ -176,7 +183,8 @@
           "invert_grid": "Enable only for a grid sensor that is negative on import and positive on export.",
           "max_age_seconds": "Seconds; 0 disables age checks for sources that only publish on value changes.",
           "max_gap_seconds": "Seconds; longer gaps are skipped without discarding the rest of the day."
-        }
+        },
+        "description": "Select consumption and grid power. All other measurements are optional; an EV charger is not required."
       }
     },
     "error": {

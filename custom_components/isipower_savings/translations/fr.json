@@ -25,7 +25,8 @@
           "invert_grid": "À activer seulement si le capteur réseau est négatif à l’achat et positif à l’injection.",
           "max_age_seconds": "En secondes. 0 désactive le contrôle d’âge pour les sources qui publient uniquement sur changement.",
           "max_gap_seconds": "En secondes. Les interruptions plus longues sont exclues du calcul, sans invalider les autres mesures de la journée."
-        }
+        },
+        "description": "Choisissez la consommation et le réseau. Les autres mesures sont facultatives ; une borne de recharge n’est pas nécessaire."
       },
       "tariffs": {
         "title": "Configurer les tarifs",
@@ -46,7 +47,8 @@
           "super_off_peak_enabled": "Facultatif. Ces plages sont prioritaires en cas de chevauchement avec les heures creuses.",
           "super_off_peak_rate": "Prix par kWh. Peut être inférieur au prix des heures creuses, y compris 0.",
           "super_off_peak_windows": "Exemple : 02:00-04:00. Plusieurs plages séparées par des virgules sont possibles."
-        }
+        },
+        "description": "Les prix sont exprimés par kWh. Les nouveaux tarifs et horaires sont historisés et ne modifient pas les périodes passées."
       },
       "export": {
         "title": "Configurer l’injection",
@@ -57,7 +59,8 @@
         "data_description": {
           "export_mode": "L’injection gratuite est distincte de la revente. L’énergie injectée est toujours enregistrée ; seuls les kWh rémunérés créent une recette. Ce réglage ne commande pas le matériel.",
           "export_rate": "Prix par kWh injecté, indépendant du tarif d’achat. Ce champ est ignoré sans injection rémunérée."
-        }
+        },
+        "description": "L’injection gratuite est distincte de la revente. Ces options ne modifient pas le matériel."
       },
       "user": {
         "title": "Choisir les mesures",
@@ -82,7 +85,8 @@
           "invert_grid": "À activer seulement si le capteur réseau est négatif à l’achat et positif à l’injection.",
           "max_age_seconds": "En secondes. 0 désactive le contrôle d’âge pour les sources qui publient uniquement sur changement.",
           "max_gap_seconds": "En secondes. Les interruptions plus longues sont exclues du calcul, sans invalider les autres mesures de la journée."
-        }
+        },
+        "description": "Choisissez la consommation et le réseau. Les autres mesures sont facultatives ; une borne de recharge n’est pas nécessaire."
       }
     },
     "error": {
@@ -121,7 +125,8 @@
           "invert_grid": "À activer seulement si le capteur réseau est négatif à l’achat et positif à l’injection.",
           "max_age_seconds": "En secondes. 0 désactive le contrôle d’âge pour les sources qui publient uniquement sur changement.",
           "max_gap_seconds": "En secondes. Les interruptions plus longues sont exclues du calcul, sans invalider les autres mesures de la journée."
-        }
+        },
+        "description": "Choisissez la consommation et le réseau. Les autres mesures sont facultatives ; une borne de recharge n’est pas nécessaire."
       },
       "tariffs": {
         "title": "Configurer les tarifs",
@@ -142,7 +147,8 @@
           "super_off_peak_enabled": "Facultatif. Ces plages sont prioritaires en cas de chevauchement avec les heures creuses.",
           "super_off_peak_rate": "Prix par kWh. Peut être inférieur au prix des heures creuses, y compris 0.",
           "super_off_peak_windows": "Exemple : 02:00-04:00. Plusieurs plages séparées par des virgules sont possibles."
-        }
+        },
+        "description": "Les prix sont exprimés par kWh. Les nouveaux tarifs et horaires sont historisés et ne modifient pas les périodes passées."
       },
       "export": {
         "title": "Configurer l’injection",
@@ -153,7 +159,8 @@
         "data_description": {
           "export_mode": "L’injection gratuite est distincte de la revente. L’énergie injectée est toujours enregistrée ; seuls les kWh rémunérés créent une recette. Ce réglage ne commande pas le matériel.",
           "export_rate": "Prix par kWh injecté, indépendant du tarif d’achat. Ce champ est ignoré sans injection rémunérée."
-        }
+        },
+        "description": "L’injection gratuite est distincte de la revente. Ces options ne modifient pas le matériel."
       },
       "init": {
         "title": "Choisir les mesures",
@@ -176,7 +183,8 @@
           "invert_grid": "À activer seulement si le capteur réseau est négatif à l’achat et positif à l’injection.",
           "max_age_seconds": "En secondes. 0 désactive le contrôle d’âge pour les sources qui publient uniquement sur changement.",
           "max_gap_seconds": "En secondes. Les interruptions plus longues sont exclues du calcul, sans invalider les autres mesures de la journée."
-        }
+        },
+        "description": "Choisissez la consommation et le réseau. Les autres mesures sont facultatives ; une borne de recharge n’est pas nécessaire."
       }
     },
     "error": {

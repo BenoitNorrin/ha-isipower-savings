@@ -16,7 +16,7 @@ def _entity(multiple=False):
     return selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", multiple=multiple))
 
 
-def _number(unit, minimum=0, maximum=None, step=.0001):
+def _number(unit, minimum=0, maximum=None, step="any"):
     kwargs = {"min": minimum, "step": step, "mode": selector.NumberSelectorMode.BOX,
               "unit_of_measurement": unit}
     if maximum is not None:
