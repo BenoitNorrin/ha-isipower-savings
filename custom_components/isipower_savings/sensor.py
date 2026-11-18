@@ -52,7 +52,7 @@ class SavingsSensor(SensorEntity):
         if self.key == "status":
             if self.coordinator.error:
                 return "source_error"
-            return "collecting" if self.coordinator.journal.engine.rows else "waiting"
+            return "collecting" if self.coordinator.journal.engine.has_interval else "waiting"
         value = self.snapshot()["benefit"]
         return round(value, 6) if value is not None else None
 

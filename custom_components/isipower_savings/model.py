@@ -4,14 +4,17 @@ from __future__ import annotations
 from bisect import bisect_right
 from datetime import datetime, time, timedelta, timezone
 import json
+import logging
 import math
 import os
 from pathlib import Path
 import re
+import tempfile
 from zoneinfo import ZoneInfo
 
 EXPORT_MODES = ("none", "unpaid", "paid")
 MONEY_KEYS = ("without_cost", "import_cost", "export_revenue", "net_cost", "consumption_savings", "benefit")
+_LOGGER = logging.getLogger(__name__)
 
 
 def stamp(value: str) -> float:
@@ -166,6 +169,9 @@ class Engine:
         self.max_gap = 900
         self.plans: list[tuple[float, dict]] = []
         self.last: dict | None = None
+        self.last_error: str | None = None
+        self.has_interval = False
+        self.sources_since = float("-inf")
         self.source_key: str | None = None
         self.rows: dict[str, dict] = {}
 
@@ -197,32 +203,43 @@ class Engine:
             self.plans.append((at, validate_plan(event["plan"])))
             return set()
         if kind == "sources":
+            self.sources_since = max(self.sources_since, stamp(event["at"]))
             self.source_key = event["key"]
             self.max_gap = int(event["max_gap_seconds"])
             if self.max_gap < 1:
                 raise ValueError("invalid_configuration")
             self.last = None  # Do not interpolate between two different perimeters.
+            self.last_error = None
+            self.has_interval = False
             return set()
         if kind != "sample":
             raise ValueError("invalid_record_type")
         current = dict(event, t=stamp(event["measured_at"]))
-        if not event.get("error"):
-            current["consumption_w"] = finite(event["consumption_w"], nonnegative=True)
-            current["grid_w"] = finite(event["grid_w"])
-            if event.get("export_w") is not None:
-                current["export_w"] = finite(event["export_w"], nonnegative=True)
-                finite(current["grid_w"], nonnegative=True)
+        if event.get("error"):
+            # Receipt time is not a measurement clock. Keep the last valid
+            # timestamp for deduplication, but never interpolate across an outage.
+            self.last_error = event["error"]
+            self.has_interval = False
+            return set()
+        current["consumption_w"] = finite(event["consumption_w"], nonnegative=True)
+        current["grid_w"] = finite(event["grid_w"])
+        if event.get("export_w") is not None:
+            current["export_w"] = finite(event["export_w"], nonnegative=True)
+            finite(current["grid_w"], nonnegative=True)
         if self.last and current["t"] <= self.last["t"]:
             return set()
-        previous, self.last = self.last, current
+        previous = self.last if self.last_error is None else None
+        self.last = current
+        self.last_error = None
+        self.has_interval = False
         if previous is None:
             return set()
         a, b = previous["t"], current["t"]
-        if previous.get("error") or current.get("error") or b - a > self.max_gap:
+        if b - a > self.max_gap:
             return set()
         if (previous.get("export_w") is None) != (current.get("export_w") is None):
             return set()
-        lo, hi = max(a, self.start), b
+        lo, hi = max(a, self.start, self.sources_since), b
         if hi <= lo:
             return set()
         boundaries = {lo, hi}
@@ -273,6 +290,7 @@ class Engine:
             row["seconds"] += seconds
             row["begin"], row["end"] = min(row["begin"], left), max(row["end"], right)
             dirty.add(key)
+        self.has_interval = True
         return dirty
 
     def summary(self, period: str, now: datetime) -> dict:
@@ -297,6 +315,9 @@ class Engine:
                 continue
             end = datetime.combine(datetime.fromisoformat(day).date()+timedelta(days=1), time(), self.tz).timestamp()
             at = datetime.fromtimestamp(min(row["end"], end-1), timezone.utc).replace(minute=0, second=0, microsecond=0)
+            if at.astimezone(self.tz).date().isoformat() < day:
+                # The first UTC hour boundary inside a fractional-offset day.
+                at += timedelta(hours=1)
             result.append({"start": at, "sum": total, "state": total})
         return result
 
@@ -310,11 +331,15 @@ class Journal:
     def load(self, now: datetime, config: dict):
         self.root.mkdir(parents=True, exist_ok=True)
         engine = Engine()
-        for path in sorted(self.root.glob("history-????-??.jsonl")):
-            with path.open(encoding="utf-8") as stream:
+        paths = sorted(self.root.glob("history-????-??.jsonl"))
+        for path in paths:
+            with path.open("rb") as stream:
                 for line in stream:
-                    if not line.endswith("\n"):
-                        raise ValueError("incomplete_journal_write")
+                    if not line.endswith(b"\n"):
+                        if path != paths[-1]:
+                            raise ValueError("incomplete_journal_write")
+                        self._recover_tail(path, line, engine)
+                        break
                     engine.apply(json.loads(line))
         self.engine = engine
         if engine.start is None:
@@ -326,6 +351,34 @@ class Journal:
         plan = build_plan(config)
         if engine.plans[-1][1] != plan:
             self.append({"type": "tariff", "at": now.isoformat(), "plan": plan})
+
+    def _recover_tail(self, path, tail, engine):
+        try:
+            event = json.loads(tail)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            # Make the fragment durable before shortening the original file.
+            with tempfile.NamedTemporaryFile(dir=self.root, prefix=path.name + ".",
+                                             suffix=".partial", delete=False) as backup:
+                backup.write(tail)
+                backup.flush()
+                os.fsync(backup.fileno())
+            directory = os.open(self.root, os.O_RDONLY)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
+            with path.open("rb+") as stream:
+                stream.seek(-len(tail), os.SEEK_END)
+                stream.truncate()
+                os.fsync(stream.fileno())
+            _LOGGER.warning("Recovered interrupted journal write; fragment saved in %s", backup.name)
+        else:
+            # A complete event can have lost only its trailing newline.
+            engine.apply(event)
+            with path.open("ab") as stream:
+                stream.write(b"\n")
+                stream.flush()
+                os.fsync(stream.fileno())
 
     def append(self, event: dict) -> set[str]:
         # Validate in isolation before committing a malformed record. Samples
@@ -357,9 +410,13 @@ class Journal:
         when = datetime.fromtimestamp(stamp(event.get("received_at", event.get("at"))), tz)
         path = self.root / f"history-{when:%Y-%m}.jsonl"
         data = json.dumps(event, ensure_ascii=False, allow_nan=False) + "\n"
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
-        with os.fdopen(fd, "w", encoding="utf-8") as stream:
-            stream.write(data)
+        fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_APPEND, 0o600)
+        with os.fdopen(fd, "ab+") as stream:
+            if stream.seek(0, os.SEEK_END):
+                stream.seek(-1, os.SEEK_END)
+                if stream.read(1) != b"\n":
+                    raise ValueError("incomplete_journal_write")
+            stream.write(data.encode("utf-8"))
             stream.flush()
             os.fsync(stream.fileno())
         return self.engine.apply(event)

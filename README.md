@@ -73,7 +73,7 @@ Les textes d’aide affichent des exemples **indicatifs**, sans sélectionner d�
 | Consommation supplémentaire | Une borne ou un autre usage exclu de la consommation principale. |
 | Horodatage de la source | `sensor.izypower_cloud_<centrale>_derniere_mise_a_jour` |
 
-L’horodatage aide à reconnaître plusieurs mises à jour d’un même rapport cloud. Sans ce capteur, l’intégration échantillonne les états disponibles dans Home Assistant.
+L’horodatage aide à reconnaître plusieurs mises à jour d’un même rapport cloud. Il couvre les puissances rattachées au même appareil et à la même intégration dans Home Assistant. Pour les autres capteurs, par exemple une borne indépendante, le suivi vérifie la date de leur dernier signalement. L’assistant signale les unités incompatibles dès la sélection.
 
 La devise et le fuseau sont ceux choisis lors de la création du suivi. Ils restent fixes pour ne pas mélanger les historiques.
 
@@ -153,6 +153,8 @@ Pour changer un tarif, ouvrir **Configurer** sur l’intégration. Le changement
 
 Sauvegarder ce dossier avec Home Assistant. Les journaux restent en dehors du dossier de l’intégration et survivent à une mise à jour HACS. Ils ne sont pas effacés lorsque l’intégration est retirée. Aucun fichier de mesures personnel n’est inclus dans ce dépôt.
 
+Si une écriture est interrompue en fin de journal, le suivi reprend au dernier relevé complet. Le fragment incomplet est conservé dans un fichier `.partial` à côté du journal. Une anomalie plus ancienne reste signalée.
+
 ## Qualité des mesures
 
 Une puissance inconnue ne vaut pas zéro. Par défaut, les rapports de plus de 15 minutes et les intervalles de plus de 15 minutes sont ignorés. Les autres intervalles de la journée restent utilisables.
@@ -160,6 +162,8 @@ Une puissance inconnue ne vaut pas zéro. Par défaut, les rapports de plus de 1
 Les options avancées permettent d’ajuster ces limites. Une fraîcheur maximale de `0` désactive le contrôle d’âge, pour les sources qui ne publient que lorsque la valeur change. Cela ne désactive pas le contrôle des interruptions entre mesures.
 
 Les changements d’heure sont pris en compte dans le fuseau configuré, y compris les fenêtres répétées ou inexistantes. Les écarts liés à la fréquence ou à la justesse des capteurs restent ceux d’une estimation.
+
+Après une interruption, le premier nouveau relevé valide sert de point de départ. Le suivant permet de chiffrer un intervalle. Après un changement de capteurs, les nouvelles mesures comptent à partir de la date du changement.
 
 ## Passage depuis la version privée « économies solaires 2.0 »
 
@@ -173,6 +177,7 @@ La CI GitHub Actions s’exécute sur chaque push et pull request :
 
 - tests du calcul, des tarifs et de la relecture des fichiers ;
 - tests des parcours Home Assistant de configuration et d’options ;
+- vérification des montants du graphique par jour, mois et année après un redémarrage de Home Assistant avec une base SQLite ;
 - vérification des fichiers JSON, de la syntaxe et du style ;
 - validation de l’intégration et de sa structure HACS.
 

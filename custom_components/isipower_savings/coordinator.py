@@ -4,10 +4,12 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime, timedelta, timezone
 
+from homeassistant.components.recorder import get_instance
 from homeassistant.components.recorder.models import StatisticMeanType
 from homeassistant.components.recorder.statistics import async_add_external_statistics
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_call_later, async_track_state_change_event, async_track_time_interval
 
@@ -40,7 +42,7 @@ class SavingsCoordinator:
     def now():
         return datetime.now(timezone.utc)
 
-    async def async_load(self):
+    async def async_load(self, on_legacy_statistics_cleared=None):
         now = self.now()
         await self.hass.async_add_executor_job(self.journal.load, now, self.config)
         key = source_key(self.config)
@@ -50,6 +52,20 @@ class SavingsCoordinator:
                 "max_gap_seconds": self.config["max_gap_seconds"],
             })
         self.ready = True
+        self.error = self.journal.engine.last_error
+        if on_legacy_statistics_cleared is not None:
+            engine = self.journal.engine
+            if engine.last or engine.rows:
+                # Old hourly snapshots can survive an upsert under another
+                # hour. Rebuild only our derived series inside the journal span.
+                begin = datetime.fromtimestamp(engine.start, timezone.utc).replace(minute=0, second=0, microsecond=0)
+                get_instance(self.hass).async_clear_statistics(
+                    [f"{DOMAIN}:{suffix}" for _, suffix, _ in STATISTICS],
+                    start_time=begin, end_time=max(begin, now) + timedelta(hours=1),
+                    on_done=lambda: self.hass.loop.call_soon_threadsafe(on_legacy_statistics_cleared),
+                )
+            else:
+                on_legacy_statistics_cleared()
         self.publish()
 
     def reading(self, now):
@@ -59,14 +75,12 @@ class SavingsCoordinator:
                 state = self.hass.states.get(entity)
                 if state is None or state.state in ("unknown", "unavailable"):
                     raise ValueError("source_unavailable")
-                if self.config["max_age_seconds"] and not self.config["source_timestamp"]:
-                    last = getattr(state, "last_reported", None) or state.last_updated
-                    age = now.timestamp() - last.timestamp()
-                    if not -60 <= age <= self.config["max_age_seconds"]:
-                        raise ValueError("source_stale")
                 return state
 
+            registry = er.async_get(self.hass)
+            clock_entry = None
             if self.config["source_timestamp"]:
+                clock_entry = registry.async_get(self.config["source_timestamp"])
                 source = state_for(self.config["source_timestamp"])
                 at = stamp(source.state)
                 age = now.timestamp() - at
@@ -76,6 +90,16 @@ class SavingsCoordinator:
 
             def power(entity):
                 state = state_for(entity)
+                entry = registry.async_get(entity)
+                shared_report = (
+                    clock_entry and clock_entry.device_id and clock_entry.config_entry_id
+                    and entry and entry.device_id == clock_entry.device_id
+                    and entry.config_entry_id == clock_entry.config_entry_id
+                )
+                if self.config["max_age_seconds"] and not shared_report:
+                    age = (now - state.last_reported).total_seconds()
+                    if not -60 <= age <= self.config["max_age_seconds"]:
+                        raise ValueError("source_stale")
                 return watts(state.state, state.attributes.get("unit_of_measurement"))
 
             consumption = power(self.config["consumption_sensor"])
@@ -112,9 +136,11 @@ class SavingsCoordinator:
                 return
             try:
                 event = self.reading(self.now())
-                last = self.journal.engine.last
-                if last and stamp(event["measured_at"]) <= last["t"]:
-                    self.error = event.get("error")
+                engine = self.journal.engine
+                if event.get("error"):
+                    if event["error"] == engine.last_error and self.error == engine.last_error:
+                        return
+                elif engine.last and stamp(event["measured_at"]) <= engine.last["t"]:
                     async_dispatcher_send(self.hass, SIGNAL)
                     return
                 dirty = await self.hass.async_add_executor_job(self.journal.append, event)

@@ -90,6 +90,8 @@
       }
     },
     "error": {
+      "invalid_power_unit": "Choose a power sensor measured in W or kW.",
+      "invalid_timestamp": "Choose a sensor that reports a timestamp with a time zone.",
       "duplicate_source": "A sensor must not be counted twice.",
       "invalid_currency": "Use a three-letter currency code such as EUR.",
       "invalid_interval": "Durations must be integers within the specified limits.",
@@ -188,6 +190,8 @@
       }
     },
     "error": {
+      "invalid_power_unit": "Choose a power sensor measured in W or kW.",
+      "invalid_timestamp": "Choose a sensor that reports a timestamp with a time zone.",
       "duplicate_source": "A sensor must not be counted twice.",
       "invalid_currency": "Use a three-letter currency code such as EUR.",
       "invalid_interval": "Durations must be integers within the specified limits.",

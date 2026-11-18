@@ -5,11 +5,11 @@ import probatio
 
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.helpers import selector
+from homeassistant.helpers import entity_registry as er, selector
 
 from .config import DEFAULTS, normalize
-from .const import DOMAIN, NAME
-from .model import build_plan
+from .const import DOMAIN, ENTRY_MINOR_VERSION, NAME
+from .model import build_plan, stamp
 
 
 def _entity(multiple=False):
@@ -75,16 +75,43 @@ class _Steps:
             candidate = {**self._values, **cleaned}
             try:
                 normalize({"base_rate": 0., **candidate})
-                self._values = candidate
-                return await self.async_step_tariffs()
+                errors.update(self._sensor_errors(candidate))
+                if not errors:
+                    self._values = candidate
+                    return await self.async_step_tariffs()
             except (ValueError, KeyError, TypeError) as exc:
                 errors["base"] = str(exc) if str(exc) in ("duplicate_source", "invalid_currency", "invalid_interval") else "invalid_configuration"
-        schema = sensors_schema(self._values, options=self._is_options,
+        values = candidate if user_input is not None else self._values
+        schema = sensors_schema(values, options=self._is_options,
                                 advanced=getattr(self, "show_advanced_options", False))
-        suggested = {key: self._values[key] for key in (
-            "additional_consumption", "export_sensor", "source_timestamp") if self._values.get(key)}
+        suggested = {key: values[key] for key in (
+            "additional_consumption", "export_sensor", "source_timestamp") if values.get(key)}
         return self.async_show_form(step_id="sensors", data_schema=self.add_suggested_values_to_schema(schema, suggested),
                                     errors=errors)
+
+    def _sensor_errors(self, values):
+        errors = {}
+        registry = er.async_get(self.hass)
+        for field in ("consumption_sensor", "grid_sensor", "additional_consumption", "export_sensor"):
+            entities = values[field] if field == "additional_consumption" else [values[field]]
+            for entity in filter(None, entities):
+                state = self.hass.states.get(entity)
+                entry = registry.async_get(entity)
+                unit = state.attributes.get("unit_of_measurement") if state else None
+                if unit is None and entry:
+                    unit = entry.unit_of_measurement
+                if unit is not None and unit not in ("W", "kW"):
+                    errors[field] = "invalid_power_unit"
+                elif unit is None and state and state.state not in ("unknown", "unavailable"):
+                    errors[field] = "invalid_power_unit"
+        if values["source_timestamp"]:
+            state = self.hass.states.get(values["source_timestamp"])
+            if state and state.state not in ("unknown", "unavailable"):
+                try:
+                    stamp(state.state)
+                except (ValueError, OverflowError):
+                    errors["source_timestamp"] = "invalid_timestamp"
+        return errors
 
     async def async_step_tariffs(self, user_input=None):
         errors = {}
@@ -111,6 +138,7 @@ class _Steps:
 
 class SavingsConfigFlow(_Steps, config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
+    MINOR_VERSION = ENTRY_MINOR_VERSION
 
     async def async_step_user(self, user_input=None):
         if self._async_current_entries():

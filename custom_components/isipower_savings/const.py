@@ -2,7 +2,7 @@
 
 DOMAIN = "isipower_savings"
 NAME = "Isipower Savings"
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 SIGNAL = f"{DOMAIN}_updated"
 DEFAULT_MAX_AGE = 900
 DEFAULT_MAX_GAP = 900
@@ -16,3 +16,4 @@ STATISTICS = (
     ("avec_eur", "avec", "Coût net estimé avec installation"),
     ("sans_eur", "sans", "Coût estimé sans installation"),
 )
+ENTRY_MINOR_VERSION = 2

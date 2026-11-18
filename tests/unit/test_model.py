@@ -183,6 +183,89 @@ class EnergyTests(unittest.TestCase):
 
 
 class HistoryTests(unittest.TestCase):
+    def test_source_switch_clips_delayed_measurements_on_replay(self):
+        start = at("2026-11-18T11:50:00")
+        with tempfile.TemporaryDirectory() as directory:
+            journal = m.Journal(directory)
+            journal.load(start, config())
+            journal.append(sample(start))
+            journal.append(sample(start + timedelta(minutes=10)))
+            switched = start + timedelta(minutes=12)
+            journal.append({"type": "sources", "key": "replacement", "at": switched.isoformat(), "max_gap_seconds": 900})
+            delayed = sample(start + timedelta(minutes=5), consumption=0, grid=0)
+            journal.append(dict(delayed, received_at=switched.isoformat()))
+            journal.append(sample(start + timedelta(minutes=15), consumption=1000, grid=0))
+            row = journal.engine.rows["2026-11-18"]
+            self.assertEqual(row["seconds"], 13 * 60)
+            # From minute 12 to 15 the replacement ramps from 700 W to 1000 W.
+            self.assertAlmostEqual(row["consumption_kwh"], 10 / 60 + .85 * 3 / 60)
+            restored = m.Journal(directory)
+            restored.load(start + timedelta(minutes=16), config())
+            self.assertEqual(restored.engine.rows, journal.engine.rows)
+
+    def test_midnight_statistics_in_fractional_time_zones(self):
+        for zone in ("Asia/Kolkata", "Asia/Kathmandu", "America/St_Johns"):
+            with self.subTest(zone=zone):
+                tz = ZoneInfo(zone)
+                midnight = datetime(2027, 1, 1, tzinfo=tz)
+                e = engine(midnight - timedelta(minutes=5), timezone=zone)
+                for n in (-5, 0, 5):
+                    e.apply(sample(midnight + timedelta(minutes=n), grid=0))
+                stats = e.statistics("benefit")
+                self.assertEqual([s["start"].astimezone(tz).date().isoformat() for s in stats],
+                                 ["2026-12-31", "2027-01-01"])
+                self.assertTrue(all(s["start"].minute == 0 for s in stats))
+                self.assertAlmostEqual(stats[1]["sum"] - stats[0]["sum"], .30 * 5 / 60)
+
+    def test_recovers_only_an_interrupted_tail_and_preserves_its_bytes(self):
+        start = at("2026-11-18T12:00:00")
+        with tempfile.TemporaryDirectory() as directory:
+            journal = m.Journal(directory)
+            journal.load(start, config())
+            journal.append(sample(start))
+            path = next(Path(directory).glob("*.jsonl"))
+            good = path.read_bytes()
+            fragment = b'{"incomplete":"\xc3'
+            path.write_bytes(good + fragment)
+            with self.assertRaisesRegex(ValueError, "incomplete"):
+                journal.append(sample(start + timedelta(minutes=1)))
+            restored = m.Journal(directory)
+            restored.load(start, config())
+            self.assertEqual(path.read_bytes(), good)
+            self.assertEqual(next(Path(directory).glob("*.partial")).read_bytes(), fragment)
+            restored.append(sample(start + timedelta(minutes=5)))
+            restored.load(start, config())
+            self.assertEqual(restored.engine.rows["2026-11-18"]["seconds"], 300)
+
+    def test_repairs_missing_newline_without_losing_a_valid_event(self):
+        start = at("2026-11-18T12:00:00")
+        with tempfile.TemporaryDirectory() as directory:
+            journal = m.Journal(directory)
+            journal.load(start, config())
+            journal.append(sample(start))
+            path = next(Path(directory).glob("*.jsonl"))
+            good = path.read_bytes()
+            path.write_bytes(good[:-1])
+            journal.load(start, config())
+            self.assertEqual(journal.engine.last["t"], start.timestamp())
+            self.assertEqual(path.read_bytes(), good)
+            self.assertEqual(list(Path(directory).glob("*.partial")), [])
+
+    def test_corruption_before_the_end_of_history_is_preserved(self):
+        start = at("2026-11-18T12:00:00")
+        for suffix, later_month in [(b"broken\n", False), (b"broken", True)]:
+            with self.subTest(later_month=later_month), tempfile.TemporaryDirectory() as directory:
+                journal = m.Journal(directory)
+                journal.load(start, config())
+                path = next(Path(directory).glob("*.jsonl"))
+                damaged = path.read_bytes() + suffix
+                path.write_bytes(damaged)
+                if later_month:
+                    (Path(directory) / "history-2026-12.jsonl").touch()
+                with self.assertRaises(ValueError):
+                    journal.load(start, config())
+                self.assertEqual(path.read_bytes(), damaged)
+
     def test_changed_windows_do_not_reprice_earlier_intervals(self):
         start = at("2026-01-10T01:55:00")
         e = engine(start, off_peak_enabled=True, off_peak_rate=.10, off_peak_windows="00:00-02:00")

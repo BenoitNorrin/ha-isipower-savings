@@ -51,6 +51,30 @@ async def test_duplicate_consumption_is_rejected(hass):
     assert result["errors"] == {"base": "duplicate_source"}
 
 
+@pytest.mark.parametrize("field", ["consumption_sensor", "grid_sensor", "additional_consumption", "export_sensor"])
+async def test_energy_is_rejected_at_each_power_field(hass, field):
+    hass.states.async_set("sensor.counter", "100", {"unit_of_measurement": "kWh"})
+    hass.states.async_set("sensor.plain_power", "0", {"unit_of_measurement": "kW"})
+    result = await start_flow(hass)
+    values = {**SOURCES, field: ["sensor.counter"] if field == "additional_consumption" else "sensor.counter"}
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], values)
+    assert result["errors"] == {field: "invalid_power_unit"}
+    values[field] = ["sensor.plain_power"] if field == "additional_consumption" else "sensor.plain_power"
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], values)
+    assert result["step_id"] == "tariffs"
+
+
+async def test_invalid_report_clock_is_flagged_in_options(hass):
+    entry = MockConfigEntry(domain=DOMAIN, data=normalize({**SOURCES, **FLAT}))
+    entry.add_to_hass(hass)
+    hass.states.async_set("sensor.wrong_clock", "100", {"unit_of_measurement": "W"})
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    values = {k: v for k, v in SOURCES.items() if k != "currency"}
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {
+        **values, "source_timestamp": "sensor.wrong_clock"})
+    assert result["errors"] == {"source_timestamp": "invalid_timestamp"}
+
+
 async def test_super_off_peak_can_be_configured(hass):
     with patch("custom_components.isipower_savings.async_setup_entry", new=AsyncMock(return_value=True)):
         result = await start_flow(hass)
