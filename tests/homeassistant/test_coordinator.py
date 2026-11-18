@@ -18,7 +18,8 @@ def states(hass, when, home=1000, grid=400):
     hass.states.async_set("sensor.report_at", when.isoformat())
 
 
-async def test_partial_day_and_recorded_prices(hass):
+async def test_partial_day_and_recorded_prices(hass, freezer):
+    freezer.move_to("2026-01-10 12:00:00+00:00")
     now = datetime.now(timezone.utc)
     cfg = config()
     c = SavingsCoordinator(hass, cfg)

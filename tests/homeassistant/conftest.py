@@ -4,9 +4,9 @@ from unittest.mock import AsyncMock, patch
 
 
 
-@pytest.fixture(autouse=True)
-def _enable_custom_components(enable_custom_integrations):
-    yield
+@pytest.fixture
+def hass_config_dir(tmp_path):
+    return str(tmp_path)
 
 
 @pytest.fixture(autouse=True)

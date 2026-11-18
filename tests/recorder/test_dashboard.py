@@ -11,7 +11,7 @@ from homeassistant import loader
 from homeassistant.components.recorder.models import StatisticMeanType
 from homeassistant.components.recorder.statistics import async_add_external_statistics, statistics_during_period
 from homeassistant.helpers import frame
-from pytest_homeassistant_custom_component.common import MockConfigEntry, async_test_home_assistant
+from pytest_homeassistant.common import MockConfigEntry, async_test_home_assistant
 
 from custom_components.isipower_savings.config import normalize
 from custom_components.isipower_savings.const import DOMAIN, ENTRY_MINOR_VERSION

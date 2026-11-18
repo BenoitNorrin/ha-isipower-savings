@@ -1,4 +1,9 @@
-pytest-homeassistant-custom-component==0.13.375
+homeassistant==2026.11.2
+pytest-homeassistant==2026.11.2
+# Recorder's runtime dependencies for the on-disk SQLite tests.
+SQLAlchemy==2.0.54
+fnv-hash-fast==2.0.3
+psutil-home-assistant==0.0.1
 pytest-cov
 ruff
 PyYAML

@@ -1,4 +1,5 @@
 [tool.pytest.ini_options]
+addopts = "-p no:respx"
 testpaths = ["tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
