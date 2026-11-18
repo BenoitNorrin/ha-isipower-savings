@@ -58,6 +58,31 @@
           "export_mode": "L’injection gratuite est distincte de la revente. L’énergie injectée est toujours enregistrée ; seuls les kWh rémunérés créent une recette. Ce réglage ne commande pas le matériel.",
           "export_rate": "Prix par kWh injecté, indépendant du tarif d’achat. Ce champ est ignoré sans injection rémunérée."
         }
+      },
+      "user": {
+        "title": "Choisir les mesures",
+        "data": {
+          "consumption_sensor": "Puissance de consommation principale",
+          "grid_sensor": "Puissance réseau",
+          "additional_consumption": "Consommations supplémentaires à ajouter (facultatif)",
+          "export_sensor": "Puissance d’injection séparée (facultatif)",
+          "source_timestamp": "Horodatage du rapport (facultatif)",
+          "currency": "Devise",
+          "invert_grid": "Inverser le signe du réseau",
+          "max_age_seconds": "Âge maximal des mesures",
+          "max_gap_seconds": "Intervalle maximal entre deux mesures"
+        },
+        "data_description": {
+          "consumption_sensor": "Capteur en W ou kW, souvent nommé « Consommation ». Exemple Isypower : sensor.izypower_cloud_nom_centrale_consommation. Il doit exclure la recharge de la batterie.",
+          "grid_sensor": "Souvent « Puissance réseau » : sensor.izypower_cloud_nom_centrale_puissance_reseau. Positif = achat, négatif = injection. Si vous avez deux capteurs, choisir ici l’import positif.",
+          "additional_consumption": "Laisser vide si la consommation principale inclut déjà tous les usages. Exemple facultatif : « Puissance borne de recharge », sensor.isypower_cloud_nom_centrale_puissance_borne_de_recharge. Ne rien ajouter deux fois.",
+          "export_sensor": "À renseigner uniquement si import et injection sont deux capteurs positifs distincts. Exemple : sensor.injection_reseau. Avec un capteur réseau signé, laisser vide.",
+          "source_timestamp": "Exemple Isypower : sensor.izypower_cloud_nom_centrale_derniere_mise_a_jour. Permet de ne compter qu’une fois un même rapport. Sinon, les états Home Assistant sont échantillonnés.",
+          "currency": "Code à trois lettres : EUR, CHF, CAD… Cette devise restera celle de l’historique.",
+          "invert_grid": "À activer seulement si le capteur réseau est négatif à l’achat et positif à l’injection.",
+          "max_age_seconds": "En secondes. 0 désactive le contrôle d’âge pour les sources qui publient uniquement sur changement.",
+          "max_gap_seconds": "En secondes. Les interruptions plus longues sont exclues du calcul, sans invalider les autres mesures de la journée."
+        }
       }
     },
     "error": {
@@ -69,7 +94,8 @@
       "invalid_rate": "Les prix doivent être des nombres positifs ou nuls."
     },
     "abort": {
-      "already_configured": "Une installation est déjà configurée."
+      "already_configured": "Une installation est déjà configurée.",
+      "single_instance_allowed": "Une installation est déjà configurée."
     }
   },
   "options": {
@@ -127,6 +153,29 @@
         "data_description": {
           "export_mode": "L’injection gratuite est distincte de la revente. L’énergie injectée est toujours enregistrée ; seuls les kWh rémunérés créent une recette. Ce réglage ne commande pas le matériel.",
           "export_rate": "Prix par kWh injecté, indépendant du tarif d’achat. Ce champ est ignoré sans injection rémunérée."
+        }
+      },
+      "init": {
+        "title": "Choisir les mesures",
+        "data": {
+          "consumption_sensor": "Puissance de consommation principale",
+          "grid_sensor": "Puissance réseau",
+          "additional_consumption": "Consommations supplémentaires à ajouter (facultatif)",
+          "export_sensor": "Puissance d’injection séparée (facultatif)",
+          "source_timestamp": "Horodatage du rapport (facultatif)",
+          "invert_grid": "Inverser le signe du réseau",
+          "max_age_seconds": "Âge maximal des mesures",
+          "max_gap_seconds": "Intervalle maximal entre deux mesures"
+        },
+        "data_description": {
+          "consumption_sensor": "Capteur en W ou kW, souvent nommé « Consommation ». Exemple Isypower : sensor.izypower_cloud_nom_centrale_consommation. Il doit exclure la recharge de la batterie.",
+          "grid_sensor": "Souvent « Puissance réseau » : sensor.izypower_cloud_nom_centrale_puissance_reseau. Positif = achat, négatif = injection. Si vous avez deux capteurs, choisir ici l’import positif.",
+          "additional_consumption": "Laisser vide si la consommation principale inclut déjà tous les usages. Exemple facultatif : « Puissance borne de recharge », sensor.isypower_cloud_nom_centrale_puissance_borne_de_recharge. Ne rien ajouter deux fois.",
+          "export_sensor": "À renseigner uniquement si import et injection sont deux capteurs positifs distincts. Exemple : sensor.injection_reseau. Avec un capteur réseau signé, laisser vide.",
+          "source_timestamp": "Exemple Isypower : sensor.izypower_cloud_nom_centrale_derniere_mise_a_jour. Permet de ne compter qu’une fois un même rapport. Sinon, les états Home Assistant sont échantillonnés.",
+          "invert_grid": "À activer seulement si le capteur réseau est négatif à l’achat et positif à l’injection.",
+          "max_age_seconds": "En secondes. 0 désactive le contrôle d’âge pour les sources qui publient uniquement sur changement.",
+          "max_gap_seconds": "En secondes. Les interruptions plus longues sont exclues du calcul, sans invalider les autres mesures de la journée."
         }
       }
     },
