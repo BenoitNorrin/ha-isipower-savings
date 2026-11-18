@@ -1,0 +1,203 @@
+title: Gain solaire estimé
+views:
+- title: Jour
+  path: jour
+  icon: mdi:calendar-today
+  type: sections
+  max_columns: 3
+  sections:
+  - type: grid
+    column_span: 2
+    cards:
+    - type: statistics-graph
+      title: Gain par jour
+      chart_type: bar
+      period: day
+      days_to_show: 30
+      stat_types:
+      - change
+      entities:
+      - entity: isipower_savings:benefit
+        name: Économies + revenus d’injection
+      grid_options:
+        columns: full
+        rows: 6
+  - type: grid
+    cards:
+    - type: markdown
+      title: Aujourd’hui
+      grid_options:
+        columns: full
+        rows: auto
+      content: '{% set e = ''sensor.isipower_savings_jour'' %}
+
+        {% set gain = states(e) %}
+
+        {% set devise = state_attr(e, ''currency'') or ''EUR'' %}
+
+        {% if gain not in [''unknown'',''unavailable''] %}
+
+        ## {{ (''%.2f'' | format(gain | float)) | replace(''.'', '','') }} {{ devise }}
+
+
+        Gain total estimé · hors abonnement.
+
+
+        | Détail | {{ devise }} |
+
+        | :--- | ---: |
+
+        | Sans installation | {{ (''%.2f'' | format(state_attr(e, ''without_cost''))) | replace(''.'', '','') }}
+        |
+
+        | Achats avec installation | {{ (''%.2f'' | format(state_attr(e, ''import_cost''))) | replace(''.'', '','')
+        }} |
+
+        | Économies sur les usages | {{ (''%.2f'' | format(state_attr(e, ''consumption_savings''))) | replace(''.'',
+        '','') }} |
+
+        | Revenus d’injection | {{ (''%.2f'' | format(state_attr(e, ''export_revenue''))) | replace(''.'', '','')
+        }} |
+
+
+        {{ state_attr(e, ''measured_hours'') }} h mesurées · périodes partielles incluses.
+
+        {% else %}
+
+        En attente des premières mesures exploitables.
+
+        {% endif %}'
+- title: Mois
+  path: mois
+  icon: mdi:calendar-month
+  type: sections
+  max_columns: 3
+  sections:
+  - type: grid
+    column_span: 2
+    cards:
+    - type: statistics-graph
+      title: Gain par mois
+      chart_type: bar
+      period: month
+      days_to_show: 400
+      stat_types:
+      - change
+      entities:
+      - entity: isipower_savings:benefit
+        name: Économies + revenus d’injection
+      grid_options:
+        columns: full
+        rows: 6
+  - type: grid
+    cards:
+    - type: markdown
+      title: Ce mois
+      grid_options:
+        columns: full
+        rows: auto
+      content: '{% set e = ''sensor.isipower_savings_mois'' %}
+
+        {% set gain = states(e) %}
+
+        {% set devise = state_attr(e, ''currency'') or ''EUR'' %}
+
+        {% if gain not in [''unknown'',''unavailable''] %}
+
+        ## {{ (''%.2f'' | format(gain | float)) | replace(''.'', '','') }} {{ devise }}
+
+
+        Gain total estimé · hors abonnement.
+
+
+        | Détail | {{ devise }} |
+
+        | :--- | ---: |
+
+        | Sans installation | {{ (''%.2f'' | format(state_attr(e, ''without_cost''))) | replace(''.'', '','') }}
+        |
+
+        | Achats avec installation | {{ (''%.2f'' | format(state_attr(e, ''import_cost''))) | replace(''.'', '','')
+        }} |
+
+        | Économies sur les usages | {{ (''%.2f'' | format(state_attr(e, ''consumption_savings''))) | replace(''.'',
+        '','') }} |
+
+        | Revenus d’injection | {{ (''%.2f'' | format(state_attr(e, ''export_revenue''))) | replace(''.'', '','')
+        }} |
+
+
+        {{ state_attr(e, ''measured_hours'') }} h mesurées · périodes partielles incluses.
+
+        {% else %}
+
+        En attente des premières mesures exploitables.
+
+        {% endif %}'
+- title: Année
+  path: annee
+  icon: mdi:calendar-range
+  type: sections
+  max_columns: 3
+  sections:
+  - type: grid
+    column_span: 2
+    cards:
+    - type: statistics-graph
+      title: Gain par année
+      chart_type: bar
+      period: year
+      days_to_show: 1826
+      stat_types:
+      - change
+      entities:
+      - entity: isipower_savings:benefit
+        name: Économies + revenus d’injection
+      grid_options:
+        columns: full
+        rows: 6
+  - type: grid
+    cards:
+    - type: markdown
+      title: Cette année
+      grid_options:
+        columns: full
+        rows: auto
+      content: '{% set e = ''sensor.isipower_savings_annee'' %}
+
+        {% set gain = states(e) %}
+
+        {% set devise = state_attr(e, ''currency'') or ''EUR'' %}
+
+        {% if gain not in [''unknown'',''unavailable''] %}
+
+        ## {{ (''%.2f'' | format(gain | float)) | replace(''.'', '','') }} {{ devise }}
+
+
+        Gain total estimé · hors abonnement.
+
+
+        | Détail | {{ devise }} |
+
+        | :--- | ---: |
+
+        | Sans installation | {{ (''%.2f'' | format(state_attr(e, ''without_cost''))) | replace(''.'', '','') }}
+        |
+
+        | Achats avec installation | {{ (''%.2f'' | format(state_attr(e, ''import_cost''))) | replace(''.'', '','')
+        }} |
+
+        | Économies sur les usages | {{ (''%.2f'' | format(state_attr(e, ''consumption_savings''))) | replace(''.'',
+        '','') }} |
+
+        | Revenus d’injection | {{ (''%.2f'' | format(state_attr(e, ''export_revenue''))) | replace(''.'', '','')
+        }} |
+
+
+        {{ state_attr(e, ''measured_hours'') }} h mesurées · périodes partielles incluses.
+
+        {% else %}
+
+        En attente des premières mesures exploitables.
+
+        {% endif %}'

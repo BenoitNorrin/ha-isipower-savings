@@ -1,0 +1,14 @@
+{
+  "domain": "isipower_savings",
+  "name": "Isipower Savings",
+  "codeowners": ["@BenoitNorrin"],
+  "config_flow": true,
+  "dependencies": ["recorder"],
+  "documentation": "https://github.com/BenoitNorrin/ha-isipower-savings",
+  "integration_type": "helper",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/BenoitNorrin/ha-isipower-savings/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "0.1.0"
+}

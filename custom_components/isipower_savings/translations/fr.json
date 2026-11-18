@@ -1,0 +1,172 @@
+{
+  "title": "Isipower Savings",
+  "config": {
+    "step": {
+      "sensors": {
+        "title": "Choisir les mesures",
+        "data": {
+          "consumption_sensor": "Puissance de consommation principale",
+          "grid_sensor": "Puissance réseau",
+          "additional_consumption": "Consommations supplémentaires à ajouter (facultatif)",
+          "export_sensor": "Puissance d’injection séparée (facultatif)",
+          "source_timestamp": "Horodatage du rapport (facultatif)",
+          "currency": "Devise",
+          "invert_grid": "Inverser le signe du réseau",
+          "max_age_seconds": "Âge maximal des mesures",
+          "max_gap_seconds": "Intervalle maximal entre deux mesures"
+        },
+        "data_description": {
+          "consumption_sensor": "Capteur en W ou kW, souvent nommé « Consommation ». Exemple Isypower : sensor.izypower_cloud_<centrale>_consommation. Il doit exclure la recharge de la batterie.",
+          "grid_sensor": "Souvent « Puissance réseau » : sensor.izypower_cloud_<centrale>_puissance_reseau. Positif = achat, négatif = injection. Si vous avez deux capteurs, choisir ici l’import positif.",
+          "additional_consumption": "Laisser vide si la consommation principale inclut déjà tous les usages. Exemple facultatif : « Puissance borne de recharge », sensor.isypower_cloud_<centrale>_puissance_borne_de_recharge. Ne rien ajouter deux fois.",
+          "export_sensor": "À renseigner uniquement si import et injection sont deux capteurs positifs distincts. Exemple : sensor.injection_reseau. Avec un capteur réseau signé, laisser vide.",
+          "source_timestamp": "Exemple Isypower : sensor.izypower_cloud_<centrale>_derniere_mise_a_jour. Permet de ne compter qu’une fois un même rapport. Sinon, les états Home Assistant sont échantillonnés.",
+          "currency": "Code à trois lettres : EUR, CHF, CAD… Cette devise restera celle de l’historique.",
+          "invert_grid": "À activer seulement si le capteur réseau est négatif à l’achat et positif à l’injection.",
+          "max_age_seconds": "En secondes. 0 désactive le contrôle d’âge pour les sources qui publient uniquement sur changement.",
+          "max_gap_seconds": "En secondes. Les interruptions plus longues sont exclues du calcul, sans invalider les autres mesures de la journée."
+        }
+      },
+      "tariffs": {
+        "title": "Configurer les tarifs",
+        "data": {
+          "base_rate": "Tarif unique ou prix des heures pleines",
+          "off_peak_enabled": "Utiliser des heures creuses",
+          "off_peak_rate": "Prix des heures creuses",
+          "off_peak_windows": "Plages des heures creuses",
+          "super_off_peak_enabled": "Utiliser des heures super creuses",
+          "super_off_peak_rate": "Prix des heures super creuses",
+          "super_off_peak_windows": "Plages des heures super creuses"
+        },
+        "data_description": {
+          "base_rate": "Prix par kWh dans votre devise. Pour un tarif unique, laisser les deux options ci-dessous désactivées. Un prix de 0 est accepté.",
+          "off_peak_enabled": "Facultatif : désactiver pour conserver uniquement le tarif de base.",
+          "off_peak_rate": "Prix par kWh, utilisé seulement quand les heures creuses sont activées.",
+          "off_peak_windows": "Une ou plusieurs plages quotidiennes : 22:00-06:00,13:00-15:00. Les plages traversant minuit sont acceptées.",
+          "super_off_peak_enabled": "Facultatif. Ces plages sont prioritaires en cas de chevauchement avec les heures creuses.",
+          "super_off_peak_rate": "Prix par kWh. Peut être inférieur au prix des heures creuses, y compris 0.",
+          "super_off_peak_windows": "Exemple : 02:00-04:00. Plusieurs plages séparées par des virgules sont possibles."
+        }
+      },
+      "export": {
+        "title": "Configurer l’injection",
+        "data": {
+          "export_mode": "Injection et rémunération",
+          "export_rate": "Prix de rachat du surplus injecté"
+        },
+        "data_description": {
+          "export_mode": "L’injection gratuite est distincte de la revente. L’énergie injectée est toujours enregistrée ; seuls les kWh rémunérés créent une recette. Ce réglage ne commande pas le matériel.",
+          "export_rate": "Prix par kWh injecté, indépendant du tarif d’achat. Ce champ est ignoré sans injection rémunérée."
+        }
+      }
+    },
+    "error": {
+      "duplicate_source": "Un même capteur ne doit pas être compté deux fois.",
+      "invalid_currency": "Utiliser un code de devise à trois lettres, par exemple EUR.",
+      "invalid_interval": "Les durées doivent être des nombres entiers dans les limites indiquées.",
+      "invalid_configuration": "Vérifier les capteurs sélectionnés et la configuration.",
+      "invalid_windows": "Utiliser HH:MM-HH:MM, par exemple 22:00-06:00. Une plage activée ne peut pas être vide.",
+      "invalid_rate": "Les prix doivent être des nombres positifs ou nuls."
+    },
+    "abort": {
+      "already_configured": "Une installation est déjà configurée."
+    }
+  },
+  "options": {
+    "step": {
+      "sensors": {
+        "title": "Choisir les mesures",
+        "data": {
+          "consumption_sensor": "Puissance de consommation principale",
+          "grid_sensor": "Puissance réseau",
+          "additional_consumption": "Consommations supplémentaires à ajouter (facultatif)",
+          "export_sensor": "Puissance d’injection séparée (facultatif)",
+          "source_timestamp": "Horodatage du rapport (facultatif)",
+          "invert_grid": "Inverser le signe du réseau",
+          "max_age_seconds": "Âge maximal des mesures",
+          "max_gap_seconds": "Intervalle maximal entre deux mesures"
+        },
+        "data_description": {
+          "consumption_sensor": "Capteur en W ou kW, souvent nommé « Consommation ». Exemple Isypower : sensor.izypower_cloud_<centrale>_consommation. Il doit exclure la recharge de la batterie.",
+          "grid_sensor": "Souvent « Puissance réseau » : sensor.izypower_cloud_<centrale>_puissance_reseau. Positif = achat, négatif = injection. Si vous avez deux capteurs, choisir ici l’import positif.",
+          "additional_consumption": "Laisser vide si la consommation principale inclut déjà tous les usages. Exemple facultatif : « Puissance borne de recharge », sensor.isypower_cloud_<centrale>_puissance_borne_de_recharge. Ne rien ajouter deux fois.",
+          "export_sensor": "À renseigner uniquement si import et injection sont deux capteurs positifs distincts. Exemple : sensor.injection_reseau. Avec un capteur réseau signé, laisser vide.",
+          "source_timestamp": "Exemple Isypower : sensor.izypower_cloud_<centrale>_derniere_mise_a_jour. Permet de ne compter qu’une fois un même rapport. Sinon, les états Home Assistant sont échantillonnés.",
+          "invert_grid": "À activer seulement si le capteur réseau est négatif à l’achat et positif à l’injection.",
+          "max_age_seconds": "En secondes. 0 désactive le contrôle d’âge pour les sources qui publient uniquement sur changement.",
+          "max_gap_seconds": "En secondes. Les interruptions plus longues sont exclues du calcul, sans invalider les autres mesures de la journée."
+        }
+      },
+      "tariffs": {
+        "title": "Configurer les tarifs",
+        "data": {
+          "base_rate": "Tarif unique ou prix des heures pleines",
+          "off_peak_enabled": "Utiliser des heures creuses",
+          "off_peak_rate": "Prix des heures creuses",
+          "off_peak_windows": "Plages des heures creuses",
+          "super_off_peak_enabled": "Utiliser des heures super creuses",
+          "super_off_peak_rate": "Prix des heures super creuses",
+          "super_off_peak_windows": "Plages des heures super creuses"
+        },
+        "data_description": {
+          "base_rate": "Prix par kWh dans votre devise. Pour un tarif unique, laisser les deux options ci-dessous désactivées. Un prix de 0 est accepté.",
+          "off_peak_enabled": "Facultatif : désactiver pour conserver uniquement le tarif de base.",
+          "off_peak_rate": "Prix par kWh, utilisé seulement quand les heures creuses sont activées.",
+          "off_peak_windows": "Une ou plusieurs plages quotidiennes : 22:00-06:00,13:00-15:00. Les plages traversant minuit sont acceptées.",
+          "super_off_peak_enabled": "Facultatif. Ces plages sont prioritaires en cas de chevauchement avec les heures creuses.",
+          "super_off_peak_rate": "Prix par kWh. Peut être inférieur au prix des heures creuses, y compris 0.",
+          "super_off_peak_windows": "Exemple : 02:00-04:00. Plusieurs plages séparées par des virgules sont possibles."
+        }
+      },
+      "export": {
+        "title": "Configurer l’injection",
+        "data": {
+          "export_mode": "Injection et rémunération",
+          "export_rate": "Prix de rachat du surplus injecté"
+        },
+        "data_description": {
+          "export_mode": "L’injection gratuite est distincte de la revente. L’énergie injectée est toujours enregistrée ; seuls les kWh rémunérés créent une recette. Ce réglage ne commande pas le matériel.",
+          "export_rate": "Prix par kWh injecté, indépendant du tarif d’achat. Ce champ est ignoré sans injection rémunérée."
+        }
+      }
+    },
+    "error": {
+      "duplicate_source": "Un même capteur ne doit pas être compté deux fois.",
+      "invalid_currency": "Utiliser un code de devise à trois lettres, par exemple EUR.",
+      "invalid_interval": "Les durées doivent être des nombres entiers dans les limites indiquées.",
+      "invalid_configuration": "Vérifier les capteurs sélectionnés et la configuration.",
+      "invalid_windows": "Utiliser HH:MM-HH:MM, par exemple 22:00-06:00. Une plage activée ne peut pas être vide.",
+      "invalid_rate": "Les prix doivent être des nombres positifs ou nuls."
+    }
+  },
+  "selector": {
+    "export_mode": {
+      "options": {
+        "none": "Sans injection prévue",
+        "unpaid": "Injection gratuite",
+        "paid": "Injection rémunérée"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "jour": {
+        "name": "Gain estimé aujourd’hui"
+      },
+      "mois": {
+        "name": "Gain estimé ce mois"
+      },
+      "annee": {
+        "name": "Gain estimé cette année"
+      },
+      "status": {
+        "name": "Statut du suivi solaire",
+        "state": {
+          "waiting": "En attente des premières mesures",
+          "collecting": "Suivi en cours",
+          "source_error": "Source à vérifier"
+        }
+      }
+    }
+  }
+}

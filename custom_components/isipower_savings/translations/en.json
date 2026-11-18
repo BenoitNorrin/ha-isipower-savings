@@ -1,0 +1,172 @@
+{
+  "title": "Isipower Savings",
+  "config": {
+    "step": {
+      "sensors": {
+        "title": "Choose measurements",
+        "data": {
+          "consumption_sensor": "Main consumption power",
+          "grid_sensor": "Grid power",
+          "additional_consumption": "Additional consumption to include (optional)",
+          "export_sensor": "Separate export power (optional)",
+          "source_timestamp": "Report timestamp (optional)",
+          "currency": "Currency",
+          "invert_grid": "Invert grid sign",
+          "max_age_seconds": "Maximum measurement age",
+          "max_gap_seconds": "Maximum measurement interval"
+        },
+        "data_description": {
+          "consumption_sensor": "W or kW. Often called Consumption: sensor.izypower_cloud_<station>_consommation. Exclude battery charging.",
+          "grid_sensor": "Often Grid power: sensor.izypower_cloud_<station>_puissance_reseau. Positive = import, negative = export. With separate meters, select positive import here.",
+          "additional_consumption": "Leave empty if the main sensor already includes all loads. An EV charger is optional. Example: sensor.isypower_cloud_<station>_puissance_borne_de_recharge. Never add a load twice.",
+          "export_sensor": "Only for two distinct positive import/export sensors, e.g. sensor.grid_export_power. Leave empty for a signed grid sensor.",
+          "source_timestamp": "Example: sensor.izypower_cloud_<station>_derniere_mise_a_jour. Deduplicates cloud reports. Otherwise HA states are sampled.",
+          "currency": "Three-letter code such as EUR, CHF or CAD. It remains fixed for this history.",
+          "invert_grid": "Enable only for a grid sensor that is negative on import and positive on export.",
+          "max_age_seconds": "Seconds; 0 disables age checks for sources that only publish on value changes.",
+          "max_gap_seconds": "Seconds; longer gaps are skipped without discarding the rest of the day."
+        }
+      },
+      "tariffs": {
+        "title": "Configure import tariffs",
+        "data": {
+          "base_rate": "Single rate or peak rate",
+          "off_peak_enabled": "Enable off-peak periods",
+          "off_peak_rate": "Off-peak rate",
+          "off_peak_windows": "Off-peak time windows",
+          "super_off_peak_enabled": "Enable super off-peak periods",
+          "super_off_peak_rate": "Super off-peak rate",
+          "super_off_peak_windows": "Super off-peak time windows"
+        },
+        "data_description": {
+          "base_rate": "Price per kWh. For a single rate, leave both period options disabled. Zero is allowed.",
+          "off_peak_enabled": "Optional; disable to use only the base rate.",
+          "off_peak_rate": "Price per kWh when off-peak is enabled.",
+          "off_peak_windows": "Daily ranges: 22:00-06:00,13:00-15:00. Overnight windows are supported.",
+          "super_off_peak_enabled": "Optional; takes precedence over overlapping off-peak windows.",
+          "super_off_peak_rate": "Price per kWh, including zero.",
+          "super_off_peak_windows": "For example 02:00-04:00. Separate multiple windows with commas."
+        }
+      },
+      "export": {
+        "title": "Configure export",
+        "data": {
+          "export_mode": "Export and remuneration",
+          "export_rate": "Export purchase rate"
+        },
+        "data_description": {
+          "export_mode": "Unpaid export is distinct from selling. Export energy is always recorded; only remunerated export earns revenue. Does not control hardware.",
+          "export_rate": "Price per exported kWh, independent of import. Ignored when export is not remunerated."
+        }
+      }
+    },
+    "error": {
+      "duplicate_source": "A sensor must not be counted twice.",
+      "invalid_currency": "Use a three-letter currency code such as EUR.",
+      "invalid_interval": "Durations must be integers within the specified limits.",
+      "invalid_configuration": "Check selected sensors and configuration.",
+      "invalid_windows": "Use HH:MM-HH:MM, e.g. 22:00-06:00. Enabled windows cannot be empty.",
+      "invalid_rate": "Prices must be finite, non-negative numbers."
+    },
+    "abort": {
+      "already_configured": "A household is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "sensors": {
+        "title": "Choose measurements",
+        "data": {
+          "consumption_sensor": "Main consumption power",
+          "grid_sensor": "Grid power",
+          "additional_consumption": "Additional consumption to include (optional)",
+          "export_sensor": "Separate export power (optional)",
+          "source_timestamp": "Report timestamp (optional)",
+          "invert_grid": "Invert grid sign",
+          "max_age_seconds": "Maximum measurement age",
+          "max_gap_seconds": "Maximum measurement interval"
+        },
+        "data_description": {
+          "consumption_sensor": "W or kW. Often called Consumption: sensor.izypower_cloud_<station>_consommation. Exclude battery charging.",
+          "grid_sensor": "Often Grid power: sensor.izypower_cloud_<station>_puissance_reseau. Positive = import, negative = export. With separate meters, select positive import here.",
+          "additional_consumption": "Leave empty if the main sensor already includes all loads. An EV charger is optional. Example: sensor.isypower_cloud_<station>_puissance_borne_de_recharge. Never add a load twice.",
+          "export_sensor": "Only for two distinct positive import/export sensors, e.g. sensor.grid_export_power. Leave empty for a signed grid sensor.",
+          "source_timestamp": "Example: sensor.izypower_cloud_<station>_derniere_mise_a_jour. Deduplicates cloud reports. Otherwise HA states are sampled.",
+          "invert_grid": "Enable only for a grid sensor that is negative on import and positive on export.",
+          "max_age_seconds": "Seconds; 0 disables age checks for sources that only publish on value changes.",
+          "max_gap_seconds": "Seconds; longer gaps are skipped without discarding the rest of the day."
+        }
+      },
+      "tariffs": {
+        "title": "Configure import tariffs",
+        "data": {
+          "base_rate": "Single rate or peak rate",
+          "off_peak_enabled": "Enable off-peak periods",
+          "off_peak_rate": "Off-peak rate",
+          "off_peak_windows": "Off-peak time windows",
+          "super_off_peak_enabled": "Enable super off-peak periods",
+          "super_off_peak_rate": "Super off-peak rate",
+          "super_off_peak_windows": "Super off-peak time windows"
+        },
+        "data_description": {
+          "base_rate": "Price per kWh. For a single rate, leave both period options disabled. Zero is allowed.",
+          "off_peak_enabled": "Optional; disable to use only the base rate.",
+          "off_peak_rate": "Price per kWh when off-peak is enabled.",
+          "off_peak_windows": "Daily ranges: 22:00-06:00,13:00-15:00. Overnight windows are supported.",
+          "super_off_peak_enabled": "Optional; takes precedence over overlapping off-peak windows.",
+          "super_off_peak_rate": "Price per kWh, including zero.",
+          "super_off_peak_windows": "For example 02:00-04:00. Separate multiple windows with commas."
+        }
+      },
+      "export": {
+        "title": "Configure export",
+        "data": {
+          "export_mode": "Export and remuneration",
+          "export_rate": "Export purchase rate"
+        },
+        "data_description": {
+          "export_mode": "Unpaid export is distinct from selling. Export energy is always recorded; only remunerated export earns revenue. Does not control hardware.",
+          "export_rate": "Price per exported kWh, independent of import. Ignored when export is not remunerated."
+        }
+      }
+    },
+    "error": {
+      "duplicate_source": "A sensor must not be counted twice.",
+      "invalid_currency": "Use a three-letter currency code such as EUR.",
+      "invalid_interval": "Durations must be integers within the specified limits.",
+      "invalid_configuration": "Check selected sensors and configuration.",
+      "invalid_windows": "Use HH:MM-HH:MM, e.g. 22:00-06:00. Enabled windows cannot be empty.",
+      "invalid_rate": "Prices must be finite, non-negative numbers."
+    }
+  },
+  "selector": {
+    "export_mode": {
+      "options": {
+        "none": "No export expected",
+        "unpaid": "Unpaid export",
+        "paid": "Remunerated export"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "jour": {
+        "name": "Estimated benefit today"
+      },
+      "mois": {
+        "name": "Estimated benefit this month"
+      },
+      "annee": {
+        "name": "Estimated benefit this year"
+      },
+      "status": {
+        "name": "Solar tracking status",
+        "state": {
+          "waiting": "Waiting for measurements",
+          "collecting": "Collecting",
+          "source_error": "Check source"
+        }
+      }
+    }
+  }
+}

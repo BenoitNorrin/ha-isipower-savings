@@ -1,0 +1,50 @@
+name: CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Calculs et Home Assistant
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: pip
+      - name: Installer les dépendances de test
+        run: python -m pip install -r requirements_test.txt
+      - name: Vérifier le style et les erreurs statiques
+        run: ruff check .
+      - name: Exécuter les tests
+        run: pytest -v --cov --cov-report=term-missing --cov-report=xml
+      - name: Conserver le rapport de couverture
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: couverture
+          path: coverage.xml
+
+  hassfest:
+    name: Validation Home Assistant
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
+
+  hacs:
+    name: Structure du dépôt HACS personnalisé
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hacs/action@main
+        with:
+          category: integration
+          comment: false
+          # Pas de demande d'inclusion au catalogue officiel / brands.
+          ignore: brands
