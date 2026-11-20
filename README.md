@@ -1,8 +1,12 @@
 # Isipower Savings
 
+<img src="custom_components/isipower_savings/brand/icon.png" alt="Icône Isipower Savings" width="80" height="80">
+
 Estimer les économies de son installation solaire dans Home Assistant, avec des **barres par jour, par mois et par année**.
 
-L’intégration utilise les puissances déjà disponibles dans Home Assistant. Elle ne demande ni compte Linky, ni token fournisseur. Elle fonctionne avec Isypower Cloud, et avec d’autres sources fournissant les mêmes mesures en W ou kW.
+Dans Home Assistant, vous choisissez deux mesures de puissance, en W ou en kW. La première indique ce que consomment vos appareils, y compris lorsqu’ils sont alimentés par le solaire ou la batterie. La seconde indique ce que vous achetez au réseau et, si le capteur le mesure, ce que vous y injectez.
+
+**Isypower Cloud** est une source possible pour ces mesures. Si une autre intégration fournit déjà ces puissances dans Home Assistant, vous pouvez aussi sélectionner ses capteurs. Isipower Savings lit les entités que vous choisissez. Aucun accès à Linky ou à votre espace client d’électricité n’est nécessaire.
 
 **Première version publique expérimentale.** Les résultats sont des estimations fondées sur des relevés espacés. Ils servent à suivre un gain dans le temps, pas à reproduire une facture au centime près.
 
@@ -17,6 +21,35 @@ L’intégration utilise les puissances déjà disponibles dans Home Assistant. 
 - Conservation des relevés **et des changements de tarifs** dans des fichiers locaux.
 - Reprise des calculs après redémarrage, sans changer les anciens prix.
 - Aucune commande envoyée à l’onduleur, à la batterie ou au compteur.
+
+## Calcul des gains
+
+Combien auriez-vous payé pour les **mêmes usages, aux mêmes heures**, sans panneaux ni batterie ? Pour répondre, l’intégration estime les kWh entre deux relevés de puissance par interpolation. Elle découpe le calcul à minuit et à chaque changement de tarif.
+
+| Montant | Calcul pour chaque intervalle |
+| --- | --- |
+| Coût sans installation | kWh consommés par vos appareils × tarif d’achat |
+| Achats avec installation | kWh prélevés sur le réseau × tarif d’achat |
+| Économies sur les usages | Coût sans installation − achats avec installation |
+| Revenus d’injection | kWh injectés × tarif de rachat en cas de revente, sinon 0 |
+| **Gain affiché sur le graphique** | **Économies sur les usages + revenus d’injection** |
+
+Chaque barre additionne les gains des intervalles mesurés sur le jour, le mois ou l’année. Les montants portent sur l’énergie, hors abonnement, achat et amortissement du matériel et autres frais contractuels.
+
+### Exemple avec ou sans revente du surplus
+
+Sur une heure, vos panneaux produisent **3 kWh**. Vos appareils en consomment **1 kWh** et les **2 kWh** restants sont injectés sur le réseau. Au tarif d’achat de **0,25 €/kWh**, vous auriez payé **0,25 €** pour faire fonctionner les mêmes appareils sans solaire. Avec les panneaux, vous achetez **0 kWh** pendant cette heure.
+
+| Que devient le surplus ? | Achats évités | Revenus d’injection | Gain total |
+| --- | ---: | ---: | ---: |
+| Vous injectez gratuitement | 0,25 € | 0 € | **0,25 €** |
+| Vous revendez à 0,08 €/kWh | 0,25 € | 2 × 0,08 € = 0,16 € | **0,41 €** |
+
+### Exemple avec une batterie
+
+Reprenons la même heure avec une batterie qui absorbe les **2 kWh** de surplus. Le gain de cette heure est de **0,25 €** pour le kWh consommé directement. Le soir, supposons que la batterie restitue **1,8 kWh** à vos appareils après pertes, en heures pleines à **0,25 €/kWh**. Cette décharge évite **0,45 €** d’achats supplémentaires. Le gain sur les deux périodes atteint **0,70 €**, sans injection. L’énergie stockée est ainsi valorisée une seule fois, au tarif du moment où elle évite un achat.
+
+Une recharge **depuis le réseau** entre dans les achats avec installation. Par exemple, acheter **2 kWh** la nuit à **0,15 €/kWh** coûte **0,30 €**. Si la batterie restitue ensuite **1,8 kWh** en heures pleines, elle évite **0,45 €** d’achats. Le gain net de cette opération est de **0,15 €**. Si la recharge et la décharge tombent sur deux jours différents, la première barre peut afficher un gain négatif et la suivante un gain positif.
 
 ## Prérequis
 
@@ -104,22 +137,6 @@ Une plage traversant minuit est acceptée. `00:00-24:00` représente une journé
 | Injection rémunérée | Oui | kWh injectés × tarif de rachat |
 
 Le prix de rachat est indépendant du prix d’achat. Une injection gratuite n’est jamais valorisée au tarif de l’électricité achetée. Ces choix décrivent le calcul ; ils n’activent ni ne désactivent physiquement l’injection.
-
-## Comment le gain est calculé
-
-Pour chaque intervalle entre deux relevés, les puissances sont converties en kWh par interpolation. Le calcul est découpé à minuit, aux changements de tarif et aux limites des plages horaires.
-
-```text
-Coût sans installation = consommation des usages × tarif d’achat
-Coût des achats = énergie importée × tarif d’achat
-Économies sur les usages = coût sans installation − coût des achats
-Revenus d’injection = énergie injectée × tarif de rachat, si rémunérée
-Gain total = économies sur les usages + revenus d’injection
-```
-
-Les économies et les revenus sont conservés séparément. Les résultats négatifs restent négatifs : par exemple, une batterie chargée sur le réseau aujourd’hui pour être utilisée demain peut produire un gain négatif aujourd’hui.
-
-Les frais d’abonnement, l’achat du matériel, son amortissement et d’éventuels frais contractuels ne sont pas inclus. Le scénario sans installation conserve les mêmes usages et les mêmes horaires.
 
 ## Dashboard
 
